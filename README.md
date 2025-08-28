@@ -37,10 +37,23 @@ Plataforma SaaS para PyMEs en múltiples rubros (restaurantes, retail, salud, se
 - **Futuro:** CRMs, ERPs, delivery.
 
 ## Seguridad
-- RLS en DB por tenant_id.
-- JWT auth con Sanctum.
-- PII masking para IA (regex).
-- Logs de prompts para auditoría.
+- **Row Level Security (RLS):** Aislamiento de datos por `tenant_id` en PostgreSQL usando políticas como `CREATE POLICY tenant_isolation ON tenants USING (id = current_setting('app.tenant_id')::uuid);`.
+- **Autenticación:** JWT con Laravel Sanctum para APIs, incluyendo `tenant_id` en token payload.
+- **Autorización:** Roles (admin, operador, usuario final) con permisos granulares definidos en Laravel policies.
+- **Cifrado:** HTTPS obligatorio (SSL/TLS) para todas las comunicaciones. Certificados via Let’s Encrypt en producción.
+- **Protección PII (IA):** Masking de datos personales (nombres, DNI, emails) antes de enviar a LLMs usando regex o Presidio.
+- **Trazabilidad:** Logs de prompts y respuestas de IA en tabla `ia_logs` con `tenant_id`, timestamp, y hash.
+- **Gestión de secretos:** Claves en `.env` para desarrollo; Docker secrets o vault en producción.
+- **Pruebas:** Escaneos con OWASP ZAP, tests de RLS, y validación de inyección SQL.
+
+## Compliance
+- **GDPR (Europa):** Consentimiento explícito para datos personales, derecho al olvido, retención configurable (ej. borrar `messages` tras 6 meses). Ver [GDPR.eu](https://gdpr.eu).
+- **LGPD (Argentina/Brasil):** Protección de datos personales (DNI, CPF) con masking y notificación de brechas. Ver [LGPD](https://www.gov.br/lgpd).
+- **HIPAA (futuro, salud):** Cifrado AES-256 y auditorías para datos médicos (a evaluar en Fase 3).
+- **Implementación:** 
+  - PII masking en workers FastAPI antes de LLM.
+  - Retención configurable en DB (ej. `DELETE FROM messages WHERE created_at < now() - interval '6 months'`).
+  - Logs de auditoría para trazabilidad.
 
 ## User Stories
 - Como dueño de restaurante, quiero activar un pack para gestionar pedidos vía WhatsApp.
