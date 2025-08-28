@@ -1,0 +1,14 @@
+node_modules/
+vendor/
+.env
+*.log
+docker-compose.override.yml
+/storage/*
+!/storage/framework
+/storage/framework/*
+!/storage/framework/cache
+!/storage/framework/sessions
+!/storage/framework/views
+/frontend/.next
+/frontend/out
+/db_data
